@@ -165,7 +165,7 @@ GenMLModels = function(data_path, output, weather_var, nfolds, tune_length, save
   vars = c(quant_vars, qual_vars, weather_var, output)
   raw_data = raw_data %>%
     select_if(colnames(raw_data) %in% vars) %>%
-    rename(targ := output) %>%
+    rename(targ := all_of(output)) %>%
     mutate_if(is.character, as.factor)
   # create dummy variables
   dummy_data = CreateDummies(raw_data)
@@ -193,7 +193,7 @@ GenMLModels = function(data_path, output, weather_var, nfolds, tune_length, save
     mapply(PlotFit, models[-1], names(models[-1]), suffix, MoreArgs = list(plots_dir))
     # plot model performance
     mapply(PlotPerf, names(models), predictions,
-           MoreArgs = list(dummy_data$test$targ, suffix, plots_dirl))
+           MoreArgs = list(dummy_data$test$targ, suffix, plots_dir))
     # plot variables importance
     mapply(PlotVarImp, names(models), predictions,
            MoreArgs = list(raw_data$test, suffix, plots_dir))
