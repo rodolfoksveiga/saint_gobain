@@ -155,7 +155,7 @@ GenMLModels = function(data_path, output, weather_var, nfolds, tune_length, save
   # pre-process data
   suffix = str_extract(data_path, '(uni|multi)_(uh|app)')
   quant_vars = c('area', 'ratio', 'pd', 'azi', 'abs', 'paf', 'fv', 'somb')
-  qual_vars = c('comp', 'vidro', 'ven')
+  qual_vars = c('comp', 'vid', 'ven')
   if (str_detect(suffix, 'multi')) {
     qual_vars = append(c('pav', 'solo', 'exp'), qual_vars)
   }
