@@ -1,0 +1,9 @@
+"Tipologia","Output","MAE","RMSE","RSquared"
+"Uni","PHFT",1.86,2.98,0.97
+"Uni","Dif. PHFT",1.92,3.1,0.97
+"Uni","CgTT",364.44,604.75,0.97
+"Uni","Dif. CgTT",332.38,543.47,0.97
+"Multi","PHFT",2.04,2.74,0.99
+"Multi","Dif. PHFT",1.98,2.71,0.98
+"Multi","CgTT",168.2,239.98,0.99
+"Multi","Dif. CgTT",186.2,258.06,0.98
