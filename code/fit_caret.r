@@ -208,7 +208,7 @@ GenMLModels = function(data_path, output, weather_var, nfolds, tune_length, save
 }
 
 # application ####
-data_paths = paste0('data_', c('uni', 'multi'), '_uh.csv')
+data_paths = paste0('./data/data_', c('uni', 'multi'), '_uh.csv')
 outputs = c('phft', 'dif_phft', 'cgtt', 'dif_cgtt')
 weather_vars = c('tbsm', 'tbum', 'cdh')
 grid = expand.grid(data_path = data_paths, output = outputs,

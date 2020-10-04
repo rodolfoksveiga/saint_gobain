@@ -1,21 +1,26 @@
 # setup environment ####
-# load libraries
+# load packages
 library(caret)
 library(dplyr)
 library(purrr)
 # load predictive models
-models = readRDS('./result/models.rds')
+if (file.exists('models.rds')) {
+  models = readRDS('models.rds')
+} else {
+  stop(paste('O caminho para o arquivo com os metamodelos está',
+             'incorreto. Confira se os arquivos predict_outputs.r',
+             'e models.rds encontram-se no mesmo diretório.'))
+}
 
 # define functions ####
 # predict one output
-PredOutput = function(targ, dummies, typo, mls) {
+PredOutput = function(targ, dummies, typo) {
   # targ: the target name ('phft', 'dif_phft', 'cgtt' or 'dif_cgtt)
   # dummies: the input data after the dummy transformation
   # typo: the typology ('uni' or 'multi')
-  # mls: list of predictive
   # associate the target and typology with the related model and execute the predictions
   out = capture.output({
-    predictions = mls %>%
+    predictions = models %>%
       pluck(typo, targ) %>%
       predict(newdata = dummies)
   })
@@ -23,19 +28,19 @@ PredOutput = function(targ, dummies, typo, mls) {
   return(predictions)
 }
 # predict dweling performance
-PredPerfUH = function(inputs, mls = models) {
+PredPerfUH = function(inputs, data_path = 'data.csv') {
   # inputs: list of inputs/predictors
-  # tbl: table (csv) file with unlimited rows of predictors
-  # mls: list of predictive models
+  # data_path: path to the outputs file (if NULL, the data will not be written)
   # fit inputs into a grid data frame if no table was provided
   if (is.list(inputs)) {
     inputs = expand.grid(inputs)
-  } else if (is.character(inputs)) {
+  } else if (file.exists(inputs)) {
     inputs = read.csv(inputs)
   } else {
-    stop(paste0('Confira se o argumento "inputs" foi associado a uma lista com as ',
-                'variáveis de entrada e os seus valores ou o caminho da tabela/csv ',
-                'na sua máquina.  Qualquer valor diferente disso não é aceito.'))
+    stop(paste('Confira se o argumento "inputs" foi definido corretamente.\n',
+               ' São aceitos apenas: a) uma lista com as variáveis de entrada',
+               'e os seus respectivos valores; b) um caminho válido para a',
+               'tabela/csv contendo os inputs.'))
   }
   # check if the number of inputs is correct and define the typology
   ncols = ncol(inputs)
@@ -46,16 +51,17 @@ PredPerfUH = function(inputs, mls = models) {
     message('Variáveis de entrada referentes à tipologia multifamiliar.')
     typo = 'multi'
   } else {
-    stop('Reveja as suas variáveis de entrada. Me parece que elas estão incorretas..!')
+    stop(paste('Reveja as suas variáveis de entrada.',
+               'Me parece que elas estão incorretas..!'))
   }
   # create dummy variables
-  dummies = mls[[c(typo, 'dummy_model')]] %>%
+  dummies = models[[c(typo, 'dummy_model')]] %>%
     predict(newdata = mutate(inputs, targ = NA)) %>%
     data.frame()
   # predict the outputs
   targs = c('phft', 'dif_phft', 'cgtt', 'dif_cgtt')
   predictions = targs %>%
-    sapply(PredOutput, dummies, typo, mls) %>%
+    sapply(PredOutput, dummies, typo) %>%
     as.data.frame() %>%
     round(1)
   # pos-process
@@ -69,14 +75,27 @@ PredPerfUH = function(inputs, mls = models) {
     # bind inputs and outputs to build the final data frame
     data = cbind(inputs, predictions)
   }
+  # write a file containing inputs and outputs
+  if (!is.null(data_path)) {
+    if (dir.exists(dirname(data_path))) {
+      write.csv(data, data_path, row.names = FALSE)
+      message(paste('A tabela com os resultados foi salva em:',
+                    normalizePath(data_path)))
+    } else {
+      stop(paste('O diretório para pra salvar a tabela com os resultados',
+                 'me parece incorreto.\n  Confira se o caminho inserido',
+                 'no argumento "data_path" realmente existe.'))
+    }
+  } else {
+    message('A tabela com os resultados não foi salva.')
+  }
   # return the data
   return(data)
 }
 
 # application examples ####
-  # complete the code below in order to predict your input data
+# complete the code below in order to predict your input data
 inputs = list()
 inputs = ''
-data = PredPerfUH()
-data_path
-write.csv(data, data_path)
+data_path = ''
+data = PredPerfUH(inputs, data_path)
