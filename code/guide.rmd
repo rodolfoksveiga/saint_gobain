@@ -37,11 +37,8 @@ Para instalar esses pacotes o usuário deve abrir o console na linguagem **R** e
 
 \
 
-``` {r eval = FALSE}
-  install.packages('devtools')
-```
-
 ``` {r message = FALSE}
+  install.packages('devtools')
   pkgs = c('caret', 'dplyr', 'purrr', 'xgboost')
   vrs = c('6.0-86', '1.0.2', '0.3.4', '1.2.0.1')
   mapply(devtools::install_version, pkgs, vrs)

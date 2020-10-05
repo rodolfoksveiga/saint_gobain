@@ -5,7 +5,7 @@ invisible({
   # required packages to fit models
   # pkgs = c(pkgs, 'quantregForest', 'party', 'mboost', 'plyr', 'kernlab', 'brnn')
   lapply(pkgs, library, character.only = TRUE)
-  inmet = read.csv('inmet_list.csv', stringsAsFactors = FALSE)
+  inmet = read.csv('./source/inmet_list.csv', stringsAsFactors = FALSE)
 })
 
 # base functions ####
