@@ -39,17 +39,24 @@ Para instalar esses pacotes o usuário deve abrir o console na linguagem **R** e
 
 ``` {r eval = FALSE}
   install.packages('devtools')
-  pkgs = c('caret', 'dplyr', 'purrr')
-  vrs = c('6.0-86', '1.0.2', '0.3.4')
+```
+
+``` {r message = FALSE}
+  pkgs = c('caret', 'dplyr', 'purrr', 'xgboost')
+  vrs = c('6.0-86', '1.0.2', '0.3.4', '1.2.0.1')
   mapply(devtools::install_version, pkgs, vrs)
 ```
 
 \
 
-Além disso, é necessário que os seguintes arquivos estejam **localizados no mesmo diretório**:
+**Caso os pacotes tenham sido instalados corretamente, as mensagens acima deve aparecer no console.**
 
-1. **predict_outputs.r** ([*link* para *download*](https://drive.google.com/uc?export=download&id=1kCJYMu2rNBbtG7N4BvmD7ugDFKxosLOD))
-2. **models.rds** ([*link* para *download*](https://drive.google.com/uc?export=download&id=12qCwPNFevstfo89JdRuIPf-eMWDOQ1lc))
+\
+
+Além disso, é necessário que o usuário possua em sua máquina local os seguintes arquivos:
+
+1. **predict_outputs.r** ([*download link*](https://drive.google.com/uc?export=download&id=1kCJYMu2rNBbtG7N4BvmD7ugDFKxosLOD))
+2. **models.rds** ([*download link*](https://drive.google.com/uc?export=download&id=12qCwPNFevstfo89JdRuIPf-eMWDOQ1lc))
 
 ***
 
@@ -59,7 +66,7 @@ A base de dados gerada para treinar os metamodelos foi desenvolvida perturbando-
 
 A partir das perturbações e da implementação do método de amostragem *Latin Hypercube*, códigos escritos na linguagem [Python 3](https://www.python.org/) geraram, de forma automatizada, **10000** modelos de simulação para a tipologia unifamiliar e **53760** para a tipologia multifamiliar. Para cada modelo de simulação foi gerado também seu respectivo modelo de referência, como exige a **nova proposta para a NBR 15575**. Todas as simulações foram executadas no programa [EnergyPlus](https://energyplus.net/), versão 9.0.1, e através dos resultados das simulações foram calculados os seguintes dados de saída: a) percentual de horas ocupadas em que o ambiente encontra-se dentro de uma determinada faixa de temperatura (PHFT), e; b) somatório das cargas térmicas de refrigeração e aquecimento quando o ambiente está ocupado e encontra-se com temperatura fora da faixa pré-determinada (CgTT).
 
-Detalhes sobre a modelagem e o cálculo dos dados de saída podem ser encontrados na [nova proposta para NBR 15575](link).
+Detalhes sobre a modelagem e o cálculo dos dados de saída podem ser encontrados na **nova proposta para NBR 15575**. O *download* da norma pode ser realizado através desse [*link*](https://drive.google.com/uc?export=download&id=1Y2CdTd3AIkkTphbIj-3EREn2eL07PbaJ).
 
 Através da base de dados foram treinados e testados metamodelos utilizando as seguintes técnicas: *Linear Regression*, *Support Vector Machine with Radial Kernel*, *Bayesian Neural Networks*, *Boosted Tree* e *Extreme Gradient Boosting*. No pre-processamento da base de dados, as variáveis de entrada quantitativas foram transformadas através da técnica *BoxCox* e as variáveis de entrada qualitativas foram transformadas em variáveis lógicas, também conhecidas como *Dummy Variables*. Todos os metamodelos foram treinados através do pacote [caret](https://topepo.github.io/caret/), da linguagem **R**.
 
@@ -134,43 +141,66 @@ Para predizer cada um dos dados de saída foi elaborado um metamodelo diferente.
 
 ### Rotina de predição através do código *predict_outputs.r*
 
-#### *Definição do ambiente de trabalho*
-
-Inicialmente, os pacotes que serão utilizados durante a execução desse código serão carregados no ambiente de trabalho. Caso os pacotes tenham sido carregados corretamente no seu ambiente de trabalho, mensagens similares às mensagens acima devem surgir no seu console.
+Antes de iniciar essa seção, certifique-se de que a seção “Dependências” foi atendida exatamente como descrito. Isso deve evitar erros inesperados nas próximas etapas.
 
 \
 
-**Certifique-se de que a seção “Dependências” foi atendida exatamente como descrito. Isso deve evitar erros inesperados nas próximas etapas.**
+#### **Carregamento dos pacotes**
+
+O código se inicia carregando os pacotes instalados previamente. Esses pacotes serão utilizados durante a definição das funções de predição.
 
 \
 
-``` {r}
-# load packages
-library(caret)
-library(dplyr)
-library(purrr)
+```{r message = FALSE}
+  # load packages
+  pkgs = c('caret', 'dplyr', 'purrr', 'xgboost')
+  lapply(pkgs, library, character.only = TRUE)
 ```
 
 \
 
-Em seguida será carregado no ambiente de trabalho o arquivo com os metamodelos. Esse arquivo deve possuir o nome **models.rds** e estar localizado na mesma pasta do arquivo **predict_outputs.r**. Caso alguma dessas exigências não seja atendida, um erro surge na tela.
+**Caso os pacotes tenham sido carregados corretamente, a mensagem acima deve aparecer no console.**
 
 \
 
-``` {r}
-# load predictive models
-if (file.exists('models.rds')) {
-  models = readRDS('models.rds')
-} else {
-  stop(paste('O caminho para o arquivo com os metamodelos está',
-             'incorreto. Confira se os arquivos predict_outputs.r',
-             'e models.rds encontram-se no mesmo diretório.'))
+#### **Definição das funções**
+
+##### *Carregamento dos metamodelos*
+
+A função `LoadModels()` é encarregada de carregar os modelos preditivos. Ela apresenta apenas o seguinte argumento: `work_dir` é o diretório de trabalho, onde deve estar localizado o arquivo **models.rds**. Após definida no ambiente de trabalho, essa função precisa ser chamada apenas uma vez após o **R** ser aberto e isso deve ser feito antes de chamar a função de predição.
+
+Primeiramente, a função `LoadModels()` checa se o diretório de trabalho inserido pelo usuário está correto. Em caso afirmativo, esse diretório é definido como o diretório de trabalho. Em caso negativo, um erro surge na tela. Por fim, será carregado o arquivo com os metamodelos. Esse arquivo deve possuir o nome **models.rds** e estar localizado no diretório de trabalho pré-definido. Caso alguma dessas exigências não seja atendida, um erro surge na tela. `LoadModels()` retorna os metamodelos que foram carregados.
+
+\
+
+``` {r message = FALSE}
+# setup environment
+LoadModels = function(work_dir) {
+  # work_dir: working directory
+  # set working directory
+  work_dir = '/home/rodox/git/stgbn/'
+  if (dir.exists(work_dir)) {
+    setwd(work_dir)
+  } else {
+    stop(paste('O diretório de trabalho definido não existe.',
+               'Confira se o nome do diretório foi inserido corretamente.'))
+  }
+  # load predictive models
+  if (file.exists('models.rds')) {
+    models = readRDS('models.rds')
+  } else {
+    stop(paste('O caminho para o arquivo com os metamodelos está',
+               'incorreto. Confira se os arquivos predict_outputs.r',
+               'e models.rds encontram-se no mesmo diretório.'))
+  }
+  # return the predictive models
+  return(models)
 }
 ```
 
 \
 
-#### *Definição das funções de predição*
+##### *Predição dos dados de saída*
 
 Em seguida serão definidas as funções que realizam as predições de forma automatizada.
 
@@ -195,9 +225,11 @@ PredOutput = function(targ, dummies, typo) {
 
 A função `PredPerfUH()` possui 2 argumentos: a) `inputs` é a lista com o nome das variáveis de entrada e seus respectivos valores, ou o caminho (na máquina local) de um arquivo *csv* com os *inputs*; b) `data_path` é o caminho (na máquina local) onde o arquivo *csv* com os *inputs* e *outputs* deve ser salvo.
 
-O argumento `data_path` possui valor pré-definido, isto é, caso esse argumento não seja preenchido o próprio código assume um valor padrão. O valor padrão de `data_path` é `data_path = 'data.csv'`, isto significa que um arquivo com o nome **data.csv** será salvo na mesma pasta onde encontra-se os arquivos **predict_outputs.r** e **models.rds**.
+O argumento `data_path` possui valor pré-definido, isto é, caso esse argumento não seja preenchido o próprio código assume um valor padrão. O valor padrão de `data_path` é `data_path = 'data.csv'`, isso significa que um arquivo com o nome **data.csv** será salvo no diretório de trabalho, na mesmo diretório onde encontra-se o arquivo **models.rds**.
 
 Inicialmente, a função `PredPerfUH()` confere se uma lista com as variáveis de entrada e os seus valores foi definida através do argumento `inputs`. Se uma lista foi inserida com mais de um valor para pelo menos uma das variáveis de entrada, ela é transformada em um *grid* com os valores listados. Caso não tenha sido inserida uma lista, a rotina confere se foi inserido um caminho válido para o arquivo *csv* contendo os *inputs*. Caso o caminho do arquivo *csv* seja inválido, o código gera um erro. Através do número de variáveis de entrada encontrado no argumento `inputs`, o código define a tipologia de interesse, sendo que **a tipologia unifamiliar exige valores de 12 variáveis de entrada**, enquanto **a tipologia multifamiliar necessita de 14 parâmetros de entrada**. Caso um número diferente de variáveis tenha sido inserido, o código é interrompido através de um erro. Em seguida, as transformações das variáveis lógicas são realizadas para que as predições das 4 variáveis de saída ("phft", "dif_phft", "cgtt" e "dif_cgtt") sejam estimadas em um *loop* sobre a função `PredictOutput()`, descrita anteriormente. Por fim, `PredPerfUH()` checa o valor inserido no argumento `data_path` e salva os dados com os *inputs* e *outputs* no caminho sugerido. Caso o diretório do caminho inserido pelo usuário no argumento `data_path` esteja incorreto, um erro surge no console. Após finalizada a rotina de cálculos, a função retorna uma tabela com os valores das variáveis de entrada e os respectivos valores das variáveis de saída.
+
+Após definida no ambiente de trabalho, a função `PredPerfUH()` pode ser chamada quantas vezes for necessário.
 
 \
 
@@ -268,19 +300,30 @@ PredPerfUH = function(inputs, data_path = 'data.csv') {
 
 \
 
-#### *Exemplos de aplicação do código* {.tabset .tabset-pills}
+#### **Exemplos de aplicação do código** {.tabset .tabset-pills}
 
-Agora que os pacotes e metamodelos já foram carregadas no ambiente de trabalho e as funções necessárias já foram definidas, basta chamar a função `PredPerfUH()` preenchendo os argumentos necessários da maneira correta. Tanto listas quanto o caminho para um arquivo *csv* podem ser inseridos no argumento `inputs`.
+Após carregar os pacotes e definir as funções necessárias, como descrito anteriormente, a função `LoadModels()` deve ser chamada para que os metamodelos sejam carregados. Essa função não precisa ser chamada novamente durante essa seção. Caso o **R** seja fechado e aberto novamente, `LoadModels()` deve ser definida e chamada novamente.
 
 \
 
-##### **Lista** {.tabset}
+```{r}
+  work_dir = '/home/rodox/git/stgbn/'
+  models = LoadModels(work_dir)
+```
+
+\
+
+Após carregados os metamodelos, basta chamar a função `PredPerfUH()` preenchendo os argumentos necessários da maneira correta. Tanto listas quanto o caminho para um arquivo *csv* podem ser inseridos no argumento `inputs`.
+
+\
+
+##### *Lista* {.tabset}
 
 A lista inserida no argumento `inputs` não precisa, necessariamente, ter valores únicos para cada uma das variáveis de entrada. É possível definir valores múltiplos para cada uma dessas variáveis. Quando definidos valores múltiplos para as variáveis de entrada, o código criará um *grid* considerando todos esses valores.
 
 ###### Valores únicos
 
-Será definida uma lista de variáveis de entrada com apenas um valor para cada variável de entrada. Então, a função `PredPerfUH()` será executada, sendo que o argumento `inputs` será associado à lista de variáveis de entrada pré-definida no seu ambiente de trabalho.
+Será definida uma lista de variáveis de entrada com apenas um valor para cada variável de entrada. Então, a função `PredPerfUH()` será chamada, sendo que o argumento `inputs` será associado à lista de variáveis de entrada pré-definida no seu ambiente de trabalho.
 
 \
 
@@ -322,7 +365,7 @@ Note que, quando se insere uma lista com um valor único para cada variável de 
 
 ###### Valores múltiplos
 
-Será definida uma lista de variáveis de entrada com pelo menos uma das variáveis com mais de um valor. A função `PredPerfUH()` será então executada, associando o argumento `inputs` à lista de variáveis de entrada pré-definida no seu ambiente de trabalho.
+Será definida uma lista de variáveis de entrada com pelo menos uma das variáveis com mais de um valor. A função `PredPerfUH()` será então chamada, associando o argumento `inputs` à lista de variáveis de entrada pré-definida no seu ambiente de trabalho.
 
 \
 
@@ -362,9 +405,9 @@ Os resultados serão impressos na tela.
 
 Observe que o *grid* que foi gerado trata-se de uma simples combinação de todas as variáveis contra todas.
 
-##### **Caminho para o arquivo csv**
+##### *Caminho para o arquivo csv*
 
-Será definido o caminho (na máquina local) para o arquivo *csv* com os *inputs* e, então, a função `PredPerfUH()`, associando o caminho pré-definido ao argumento `inputs`.
+Será definido o caminho (na máquina local) para o arquivo *csv* com os *inputs* e, então, a função `PredPerfUH()`, será chamada associando o caminho pré-definido ao argumento `inputs`.
 
 \
 
@@ -396,9 +439,9 @@ Repare que a tabela de *inputs* inserida nesse exemplo possui 27668 observaçõe
 
 \
 
-#### *Salvando os resultados* {.tabset .tabset-pills}
+#### **Salvando os resultados** {.tabset .tabset-pills}
 
-A função `PredPerfUH()` salva automaticamente os resultados de forma padronizada no mesmo diretório onde encontram-se os arquivos **predict_outputs.r** e **models.rds**. Entretanto, o argumento `data_path` permite que se salvem os resultados com um nome alternativo ou, ainda, com um caminho alternativo até outro diretório. Se não for do interesse do usuário, é possível evitar que os resultados sejam salvos.
+A função `PredPerfUH()` salva automaticamente os resultados de forma padronizada no ambiente de trabalho definido ao chamar a função `LoadModels()`. Esse deve ser o mesmo diretório onde encontra-se o arquivo **models.rds**. Entretanto, o argumento `data_path` permite que se salvem os resultados com um nome alternativo ou, ainda, com um caminho alternativo até outro diretório. Se não for do interesse do usuário, é possível evitar que os resultados sejam salvos.
 
 \
 
@@ -406,11 +449,11 @@ A função `PredPerfUH()` salva automaticamente os resultados de forma padroniza
 
 \
 
-##### **Nome padrão**
+##### *Nome padrão*
 
-A função `PredPerfUH()` salva os resultados automaticamente em um arquivo *csv* com o nome **data.csv**, na mesma pasta onde encontram-se os arquivos **predict_outputs** e **models.rds**.
+A função `PredPerfUH()` salva os resultados automaticamente em um arquivo *csv*, com o nome **data.csv**, no diretório de trabalho, onde encontra-se o arquivo **models.rds**.
 
-A função `PredPerfUH()` simplesmente será executada sem preencher o argumento `data_path`.
+A função `PredPerfUH()` simplesmente será chamada sem preencher o argumento `data_path`.
 
 \
 
@@ -418,9 +461,9 @@ A função `PredPerfUH()` simplesmente será executada sem preencher o argumento
   data = PredPerfUH('inputs.csv')
 ```
 
-##### **Nome alternativo**
+##### *Nome alternativo*
 
-É possível definir um nome de arquivo personalizado preenchendo o argumento `data_path` com o nome desejado. Esse arquivo será salvo no mesmo diretório onde estão os arquivos **predict_outputs.r** e **models.rds**.
+É possível definir um nome de arquivo personalizado preenchendo o argumento `data_path` com o nome desejado. Esse arquivo será salvo no ambiente de trabalho, onde está localizado o arquivo **models.rds**.
 
 \
 
@@ -437,9 +480,9 @@ A função `PredPerfUH()` será executada assumindo `data_path` a um nome altern
   data = PredPerfUH('inputs.csv', data_path)
 ```
 
-##### **Caminho alternativo**
+##### *Caminho alternativo*
 
-Caso seja necessário salvar o arquivo em um diretório diferente do diretório onde encontram-se os arquivos **predict_outputs** e **models.rds**, insira o caminho (na máquina local) onde se deseja-se salvar o arquivo.
+Caso seja necessário salvar o arquivo em um diretório diferente do diretório onde encontra-se o arquivo **models.rds**, basta inserir no argumento `data_path` o caminho (na máquina local) onde se deseja-se salvar o arquivo.
 
 \
 
@@ -456,9 +499,9 @@ A função `PredPerfUH()` será executada considerando um caminho alternativo no
   data = PredPerfUH('inputs.csv', data_path)
 ```
 
-##### **Não salvar**
+##### *Não salvar*
 
-Por fim, é possível orientar a função `PredPerfUH()` a não salvar o arquivo *csv*.
+É possível orientar a função `PredPerfUH()` a não salvar o arquivo *csv*.
 
 Para tanto, `PredPerfUH()` será executada considerando o argumento `data_path` como `data_path = NULL`.
 

@@ -1,18 +1,29 @@
-# setup environment ####
-# load packages
-library(caret)
-library(dplyr)
-library(purrr)
-# load predictive models
-if (file.exists('models.rds')) {
-  models = readRDS('models.rds')
-} else {
-  stop(paste('O caminho para o arquivo com os metamodelos está',
-             'incorreto. Confira se os arquivos predict_outputs.r',
-             'e models.rds encontram-se no mesmo diretório.'))
-}
+# load packages ####
+pkgs = c('caret', 'dplyr', 'purrr', 'xgboost')
+lapply(pkgs, library, character.only = TRUE)
 
-# define functions ####
+# functions ####
+# load predictive models
+LoadModels = function(work_dir) {
+  # work_dir: working directory
+  # set working directory
+  if (dir.exists(work_dir)) {
+    setwd(work_dir)
+  } else {
+    stop(paste('O diretório de trabalho definido não existe.',
+               'Confira se o nome do diretório foi inserido corretamente.'))
+  }
+  # load predictive models
+  if (file.exists('models.rds')) {
+    models <- readRDS('models.rds')
+  } else {
+    stop(paste('O caminho para o arquivo com os metamodelos está',
+               'incorreto. Confira se os arquivos predict_outputs.r',
+               'e models.rds encontram-se no mesmo diretório.'))
+  }
+  # return predictive models
+  return(models)
+}
 # predict one output
 PredOutput = function(targ, dummies, typo) {
   # targ: the target name ('phft', 'dif_phft', 'cgtt' or 'dif_cgtt)
@@ -94,8 +105,12 @@ PredPerfUH = function(inputs, data_path = 'data.csv') {
 }
 
 # application examples ####
-# complete the code below in order to predict your input data
-inputs = list()
-inputs = ''
-data_path = ''
-data = PredPerfUH(inputs, data_path)
+# complete the code below in order to predict your data
+work_dir = ''
+models = LoadModels(work_dir)
+inputs1 = ''
+data_path1 = ''
+data1 = PredPerfUH(inputs1, data_path1)
+inputs2 = ''
+data_path2 = ''
+data2 = PredPerfUH(inputs2, data_path1)
