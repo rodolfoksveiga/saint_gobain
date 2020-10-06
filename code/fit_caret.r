@@ -214,5 +214,6 @@ weather_vars = c('tbsm', 'tbum', 'cdh')
 grid = expand.grid(data_path = data_paths, output = outputs,
                    weather_var = weather_vars, stringsAsFactors = FALSE)
 grid = filter(grid, !(str_detect(output, 'phft') & weather_var %in% c('tbum', 'cdh')))
+grid = grid[12:16, ]
 mapply(GenMLModels, grid$data_path, grid$output, grid$weather_var,
-       5, 5, TRUE, TRUE, './result/', './plot_table/', 0, inmet)
+       5, 5, TRUE, TRUE, './result/', './plot_table/', 2, inmet)
