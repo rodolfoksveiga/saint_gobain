@@ -150,6 +150,11 @@ SummAccuracy = function(model, train_tech, pred, targ) {
 GenMLModels = function(data_path, output, weather_var, nfolds, tune_length, save_results,
                        save_models, models_dir, plots_dir, cores_left, inmet,
                        tune_grids = list(NULL)) {
+  
+  data_path = 'data/data_multi_uh.csv'
+  output = 'phft'
+  weather_var = 'tbsm'
+  
   # load data
   raw_data = read.csv(data_path)
   # pre-process data
@@ -168,6 +173,9 @@ GenMLModels = function(data_path, output, weather_var, nfolds, tune_length, save
     rename(targ := all_of(output)) %>%
     mutate_if(is.character, as.factor)
   # create dummy variables
+  d2 = dummyVars(targ ~ ., data = raw_data)
+  
+  
   dummy_data = CreateDummies(raw_data)
   # split data into train and test sets
   raw_data = lapply(list('train' = TRUE, 'test' = FALSE), SplitData, raw_data, 0.8)
@@ -201,7 +209,7 @@ GenMLModels = function(data_path, output, weather_var, nfolds, tune_length, save
     GenAccuracyTable(models, predictions, dummy_data$test$targ, suffix, plots_dir)
   }
   if (save_models) {
-    save(models, file = paste0(models_dir, 'models_', suffix, '.rds'))
+    saveRDS(models, file = paste0(models_dir, 'models_', suffix, '.rds'))
   } else {
     return(models)
   }

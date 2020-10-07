@@ -389,23 +389,34 @@ summary {
 <h3>Dependências</h3>
 <p>Para reproduzir o que foi descrito nesse documento é necessário que o usuário possua instalados em sua máquina local a linguagem <a href="https://www.r-project.org/">R</a>, versão 4.0.2, e os seguintes pacotes:</p>
 <ol style="list-style-type: decimal">
-<li><a href="https://cran.r-project.org/web/packages/caret/index.html">caret</a>, versão 6.0-86</li>
-<li><a href="https://cran.r-project.org/web/packages/dplyr/index.html">dplyr</a>, versão 1.0.2</li>
-<li><a href="https://cran.r-project.org/web/packages/purrr/index.html">purrr</a>, versão 0.3.4</li>
+<li><a href="https://cran.r-project.org/web/packages/caret/index.html"><code>caret</code></a>, versão 6.0-86</li>
+<li><a href="https://cran.r-project.org/web/packages/dplyr/index.html"><code>dplyr</code></a>, versão 1.0.2</li>
+<li><a href="https://cran.r-project.org/web/packages/purrr/index.html"><code>purrr</code></a>, versão 0.3.4</li>
 </ol>
 <p><br />
 </p>
 <p>Para instalar esses pacotes o usuário deve abrir o console na linguagem <strong>R</strong> e executar o código abaixo. O uso da IDE <a href="https://rstudio.com/">RStudio</a> pode facilitar a execução e o acompanhamento dos resultados dos códigos que seguem.</p>
 <p><br />
 </p>
-<pre class="r"><code>  install.packages('devtools')</code></pre>
-<pre><code>Installing devtools [2.3.2] ...
-    OK (linked cache)</code></pre>
-<pre class="r"><code>  pkgs = c('caret', 'dplyr', 'purrr', 'xgboost')
-  vrs = c('6.0-86', '1.0.2', '0.3.4', '1.2.0.1')
-  mapply(devtools::install_version, pkgs, vrs)</code></pre>
+<pre class="r"><code>install.packages('devtools')</code></pre>
+<pre><code>The following package(s) have broken symlinks into the cache:
+
+    devtools
+
+Consider re-installing these packages.
+
+Retrieving 'https://cloud.r-project.org/src/contrib/devtools_2.3.2.tar.gz' ...
+    OK [file is up to date]
+Installing devtools [2.3.2] ...
+    OK [built from source]</code></pre>
+<pre class="r"><code>pkgs = c('caret', 'dplyr', 'purrr', 'xgboost')
+vrs = c('6.0-86', '1.0.2', '0.3.4', '1.2.0.1')
+mapply(devtools::install_version, pkgs, vrs)</code></pre>
 <pre><code>    caret     dplyr     purrr   xgboost 
   &quot;caret&quot;   &quot;dplyr&quot;   &quot;purrr&quot; &quot;xgboost&quot; </code></pre>
+<p><br />
+</p>
+<p><strong>Caso os pacotes tenham sido instalados corretamente, as mensagens acima deve aparecer no console.</strong></p>
 <p><br />
 </p>
 <p>Além disso, é necessário que o usuário possua em sua máquina local os seguintes arquivos:</p>
@@ -420,7 +431,7 @@ summary {
 <p>A base de dados gerada para treinar os metamodelos foi desenvolvida perturbando-se dois modelos de simulação base, referentes à: a) uma tipologia unifamiliar térrea, e; b) uma tipologia multifamiliar, composta por pavimento térreo, tipo e cobertura. As características de ambas as tipologias foram extraídas do levantamento de edificações residenciais brasileiras de baixa renda, realizado por <a href="https://repositorio.ufsc.br/handle/123456789/176656">Montes (2016)</a>.</p>
 <p>A partir das perturbações e da implementação do método de amostragem <em>Latin Hypercube</em>, códigos escritos na linguagem <a href="https://www.python.org/">Python 3</a> geraram, de forma automatizada, <strong>10000</strong> modelos de simulação para a tipologia unifamiliar e <strong>53760</strong> para a tipologia multifamiliar. Para cada modelo de simulação foi gerado também seu respectivo modelo de referência, como exige a <strong>nova proposta para a NBR 15575</strong>. Todas as simulações foram executadas no programa <a href="https://energyplus.net/">EnergyPlus</a>, versão 9.0.1, e através dos resultados das simulações foram calculados os seguintes dados de saída: a) percentual de horas ocupadas em que o ambiente encontra-se dentro de uma determinada faixa de temperatura (PHFT), e; b) somatório das cargas térmicas de refrigeração e aquecimento quando o ambiente está ocupado e encontra-se com temperatura fora da faixa pré-determinada (CgTT).</p>
 <p>Detalhes sobre a modelagem e o cálculo dos dados de saída podem ser encontrados na <strong>nova proposta para NBR 15575</strong>. O <em>download</em> da norma pode ser realizado através desse <a href="https://drive.google.com/uc?export=download&amp;id=1Y2CdTd3AIkkTphbIj-3EREn2eL07PbaJ"><em>link</em></a>.</p>
-<p>Através da base de dados foram treinados e testados metamodelos utilizando as seguintes técnicas: <em>Linear Regression</em>, <em>Support Vector Machine with Radial Kernel</em>, <em>Bayesian Neural Networks</em>, <em>Boosted Tree</em> e <em>Extreme Gradient Boosting</em>. No pre-processamento da base de dados, as variáveis de entrada quantitativas foram transformadas através da técnica <em>BoxCox</em> e as variáveis de entrada qualitativas foram transformadas em variáveis lógicas, também conhecidas como <em>Dummy Variables</em>. Todos os metamodelos foram treinados através do pacote <a href="https://topepo.github.io/caret/">caret</a>, da linguagem <strong>R</strong>.</p>
+<p>Através da base de dados foram treinados e testados metamodelos utilizando as seguintes técnicas: <em>Linear Regression</em>, <em>Support Vector Machine with Radial Kernel</em>, <em>Bayesian Neural Networks</em>, <em>Boosted Tree</em> e <em>Extreme Gradient Boosting</em>. No pre-processamento da base de dados, as variáveis de entrada quantitativas foram transformadas através da técnica <em>BoxCox</em> e as variáveis de entrada qualitativas foram transformadas em variáveis lógicas, também conhecidas como <em>Dummy Variables</em>. Todos os metamodelos foram treinados através do pacote <a href="https://topepo.github.io/caret/"><code>caret</code></a>, da linguagem <strong>R</strong>.</p>
 <p>A tabela abaixo apresenta a estatística descritiva dos metamodelos finais, ou seja, aqueles que apresentaram os resultados mais acurados na etapa de teste, i.e. menores erro médio absoluto (MAE) e raíz do erro quadrático médio (RMSE). Os metamodelos mais acurados foram alcançados através da técnica <a href="https://xgboost.ai/"><em>Extreme Gradient Boosting</em></a>.</p>
 <p><br />
 </p>
@@ -428,10 +439,10 @@ summary {
 <thead>
 <tr class="header">
 <th align="center">Tipologia</th>
-<th align="center">Output</th>
-<th align="center">MAE</th>
-<th align="center">RMSE</th>
-<th align="center">RSquared</th>
+<th align="center">Dado de saída</th>
+<th align="center">MAE (kWh/m².ano)</th>
+<th align="center">RMSE (kWh/m².ano)</th>
+<th align="center">R² (adim.)</th>
 </tr>
 </thead>
 <tbody>
@@ -452,15 +463,15 @@ summary {
 <tr class="odd">
 <td align="center">Uni</td>
 <td align="center">CgTT</td>
-<td align="center">364.44</td>
-<td align="center">604.75</td>
+<td align="center">6.41</td>
+<td align="center">10.48</td>
 <td align="center">0.97</td>
 </tr>
 <tr class="even">
 <td align="center">Uni</td>
 <td align="center">Dif. CgTT</td>
-<td align="center">332.38</td>
-<td align="center">543.47</td>
+<td align="center">5.96</td>
+<td align="center">10.06</td>
 <td align="center">0.97</td>
 </tr>
 <tr class="odd">
@@ -480,15 +491,15 @@ summary {
 <tr class="odd">
 <td align="center">Multi</td>
 <td align="center">CgTT</td>
-<td align="center">168.20</td>
-<td align="center">239.98</td>
+<td align="center">3.92</td>
+<td align="center">5.53</td>
 <td align="center">0.99</td>
 </tr>
 <tr class="even">
 <td align="center">Multi</td>
 <td align="center">Dif. CgTT</td>
-<td align="center">186.20</td>
-<td align="center">258.06</td>
+<td align="center">4.41</td>
+<td align="center">6.03</td>
 <td align="center">0.98</td>
 </tr>
 </tbody>
@@ -551,9 +562,9 @@ summary {
 <ul>
 <li>Uni/Multi: 0.45 e 1</li>
 </ul></li>
-<li><code>ven</code> (qualitative): condição das venezianas
+<li><code>ven</code> (qualitative): uso de venezianas
 <ul>
-<li>Uni/Multi: “on” (com veneziana) e “off” (sem possui veneziana)</li>
+<li>Uni/Multi: “sim” (possui veneziana) e “nao” (não possui veneziana)</li>
 </ul></li>
 <li><code>somb</code> (cm): comprimento do sombreamento horizontal sobre todas as fachadas
 <ul>
@@ -601,9 +612,8 @@ summary {
 <p>O código se inicia carregando os pacotes instalados previamente. Esses pacotes serão utilizados durante a definição das funções de predição.</p>
 <p><br />
 </p>
-<pre class="r"><code>  # load packages
-  pkgs = c('caret', 'dplyr', 'purrr', 'xgboost')
-  lapply(pkgs, library, character.only = TRUE)</code></pre>
+<pre class="r"><code>pkgs = c('caret', 'dplyr', 'purrr', 'xgboost')
+lapply(pkgs, library, character.only = TRUE)</code></pre>
 <pre><code>[[1]]
  [1] &quot;caret&quot;     &quot;ggplot2&quot;   &quot;lattice&quot;   &quot;knitr&quot;     &quot;stats&quot;     &quot;graphics&quot; 
  [7] &quot;grDevices&quot; &quot;datasets&quot;  &quot;utils&quot;     &quot;methods&quot;   &quot;base&quot;     
@@ -635,11 +645,8 @@ summary {
 <p>Primeiramente, a função <code>LoadModels()</code> checa se o diretório de trabalho inserido pelo usuário está correto. Em caso afirmativo, esse diretório é definido como o diretório de trabalho. Em caso negativo, um erro surge na tela. Por fim, será carregado o arquivo com os metamodelos. Esse arquivo deve possuir o nome <strong>models.rds</strong> e estar localizado no diretório de trabalho pré-definido. Caso alguma dessas exigências não seja atendida, um erro surge na tela. <code>LoadModels()</code> retorna os metamodelos que foram carregados.</p>
 <p><br />
 </p>
-<pre class="r"><code># setup environment
-LoadModels = function(work_dir) {
-  # work_dir: working directory
+<pre class="r"><code>LoadModels = function(work_dir) {
   # set working directory
-  work_dir = '/home/rodox/git/stgbn/'
   if (dir.exists(work_dir)) {
     setwd(work_dir)
   } else {
@@ -648,13 +655,13 @@ LoadModels = function(work_dir) {
   }
   # load predictive models
   if (file.exists('models.rds')) {
-    models = readRDS('models.rds')
+    models &lt;- readRDS('models.rds')
   } else {
     stop(paste('O caminho para o arquivo com os metamodelos está',
                'incorreto. Confira se os arquivos predict_outputs.r',
                'e models.rds encontram-se no mesmo diretório.'))
   }
-  # return the predictive models
+  # return predictive models
   return(models)
 }</code></pre>
 <p><br />
@@ -755,8 +762,8 @@ LoadModels = function(work_dir) {
 <p>Após carregar os pacotes e definir as funções necessárias, como descrito anteriormente, a função <code>LoadModels()</code> deve ser chamada para que os metamodelos sejam carregados. Essa função não precisa ser chamada novamente durante essa seção. Caso o <strong>R</strong> seja fechado e aberto novamente, <code>LoadModels()</code> deve ser definida e chamada novamente.</p>
 <p><br />
 </p>
-<pre class="r"><code>  work_dir = '/home/rodox/git/stgbn/'
-  models = LoadModels(work_dir)</code></pre>
+<pre class="r"><code>work_dir = '/home/rodox/git/stgbn/'
+models = LoadModels(work_dir)</code></pre>
 <p><br />
 </p>
 <p>Após carregados os metamodelos, basta chamar a função <code>PredPerfUH()</code> preenchendo os argumentos necessários da maneira correta. Tanto listas quanto o caminho para um arquivo <em>csv</em> podem ser inseridos no argumento <code>inputs</code>.</p>
@@ -780,7 +787,7 @@ LoadModels = function(work_dir) {
   abs = 0.4,
   paf = 30,
   fv = 0.45,
-  ven = 'off',
+  ven = 'nao',
   somb = 50,
   tbsm = 23.05
 )
@@ -792,7 +799,7 @@ data = PredPerfUH(inputs)</code></pre>
 <p>Os resultados serão impressos no console para verificar se tudo saiu como o planejado.</p>
 <p><br />
 </p>
-<pre class="r"><code>  print(data)</code></pre>
+<pre class="r"><code>print(data)</code></pre>
 <table>
 <thead>
 <tr class="header">
@@ -808,8 +815,8 @@ data = PredPerfUH(inputs)</code></pre>
 <td align="left">prediction</td>
 <td align="center">64.2</td>
 <td align="center">7.3</td>
-<td align="center">3747.5</td>
-<td align="center">-666.6</td>
+<td align="center">101.6</td>
+<td align="center">-22.7</td>
 </tr>
 </tbody>
 </table>
@@ -832,7 +839,7 @@ data = PredPerfUH(inputs)</code></pre>
   abs = 0.2,
   paf = c(10, 30, 50),
   fv = 0.45,
-  ven = 'off',
+  ven = 'nao',
   somb = 50,
   tbsm = 23.05
 )
@@ -844,7 +851,7 @@ data = PredPerfUH(inputs)</code></pre>
 <p>Os resultados serão impressos na tela.</p>
 <p><br />
 </p>
-<pre class="r"><code>  print(data)</code></pre>
+<pre class="r"><code>print(data)</code></pre>
 <table>
 <thead>
 <tr class="header">
@@ -877,13 +884,13 @@ data = PredPerfUH(inputs)</code></pre>
 <td align="center">0.2</td>
 <td align="center">10</td>
 <td align="center">0.45</td>
-<td align="center">off</td>
+<td align="center">nao</td>
 <td align="center">50</td>
 <td align="center">23.05</td>
 <td align="center">73.3</td>
 <td align="center">18.9</td>
-<td align="center">1725.5</td>
-<td align="center">-2878.5</td>
+<td align="center">45.9</td>
+<td align="center">-72.6</td>
 </tr>
 <tr class="even">
 <td align="center">39</td>
@@ -895,13 +902,13 @@ data = PredPerfUH(inputs)</code></pre>
 <td align="center">0.2</td>
 <td align="center">10</td>
 <td align="center">0.45</td>
-<td align="center">off</td>
+<td align="center">nao</td>
 <td align="center">50</td>
 <td align="center">23.05</td>
 <td align="center">74.0</td>
 <td align="center">19.0</td>
-<td align="center">2054.0</td>
-<td align="center">-2635.4</td>
+<td align="center">46.6</td>
+<td align="center">-67.2</td>
 </tr>
 <tr class="odd">
 <td align="center">39</td>
@@ -913,13 +920,13 @@ data = PredPerfUH(inputs)</code></pre>
 <td align="center">0.2</td>
 <td align="center">30</td>
 <td align="center">0.45</td>
-<td align="center">off</td>
+<td align="center">nao</td>
 <td align="center">50</td>
 <td align="center">23.05</td>
 <td align="center">76.4</td>
 <td align="center">21.9</td>
-<td align="center">2052.2</td>
-<td align="center">-2503.4</td>
+<td align="center">49.0</td>
+<td align="center">-74.4</td>
 </tr>
 <tr class="even">
 <td align="center">39</td>
@@ -931,13 +938,13 @@ data = PredPerfUH(inputs)</code></pre>
 <td align="center">0.2</td>
 <td align="center">30</td>
 <td align="center">0.45</td>
-<td align="center">off</td>
+<td align="center">nao</td>
 <td align="center">50</td>
 <td align="center">23.05</td>
 <td align="center">76.3</td>
 <td align="center">21.2</td>
-<td align="center">2428.6</td>
-<td align="center">-2428.2</td>
+<td align="center">52.1</td>
+<td align="center">-67.8</td>
 </tr>
 <tr class="odd">
 <td align="center">39</td>
@@ -949,13 +956,13 @@ data = PredPerfUH(inputs)</code></pre>
 <td align="center">0.2</td>
 <td align="center">50</td>
 <td align="center">0.45</td>
-<td align="center">off</td>
+<td align="center">nao</td>
 <td align="center">50</td>
 <td align="center">23.05</td>
 <td align="center">78.7</td>
 <td align="center">22.5</td>
-<td align="center">2449.0</td>
-<td align="center">-2197.2</td>
+<td align="center">52.6</td>
+<td align="center">-70.5</td>
 </tr>
 <tr class="even">
 <td align="center">39</td>
@@ -967,13 +974,13 @@ data = PredPerfUH(inputs)</code></pre>
 <td align="center">0.2</td>
 <td align="center">50</td>
 <td align="center">0.45</td>
-<td align="center">off</td>
+<td align="center">nao</td>
 <td align="center">50</td>
 <td align="center">23.05</td>
 <td align="center">79.3</td>
 <td align="center">22.8</td>
-<td align="center">2379.0</td>
-<td align="center">-2433.8</td>
+<td align="center">50.8</td>
+<td align="center">-65.1</td>
 </tr>
 </tbody>
 </table>
@@ -987,18 +994,18 @@ data = PredPerfUH(inputs)</code></pre>
 <p>Será definido o caminho (na máquina local) para o arquivo <em>csv</em> com os <em>inputs</em> e, então, a função <code>PredPerfUH()</code>, será chamada associando o caminho pré-definido ao argumento <code>inputs</code>.</p>
 <p><br />
 </p>
-<pre class="r"><code>  inputs = 'inputs.csv'
-  data = PredPerfUH(inputs)</code></pre>
+<pre class="r"><code>inputs = 'inputs.csv'
+data = PredPerfUH(inputs)</code></pre>
 <pre><code>Variáveis de entrada referentes à tipologia multifamiliar.</code></pre>
 <pre><code>A tabela com os resultados foi salva em: /home/rodox/git/stgbn/data.csv</code></pre>
-<pre class="r"><code>  nrow(data)</code></pre>
+<pre class="r"><code>nrow(data)</code></pre>
 <pre><code>[1] 27648</code></pre>
 <p><br />
 </p>
 <p>Repare que a tabela de <em>inputs</em> inserida nesse exemplo possui 27668 observações (linhas), portanto, apenas as 20 primeiras linhas serão impressas.</p>
 <p><br />
 </p>
-<pre class="r"><code>  print(head(data, 20))</code></pre>
+<pre class="r"><code>print(head(data, 20))</code></pre>
 <table>
 <thead>
 <tr class="header">
@@ -1035,13 +1042,13 @@ data = PredPerfUH(inputs)</code></pre>
 <td align="center">0.2</td>
 <td align="center">10</td>
 <td align="center">0.45</td>
-<td align="center">on</td>
+<td align="center">sim</td>
 <td align="center">0</td>
 <td align="center">17.38</td>
 <td align="center">88.9</td>
 <td align="center">-6.7</td>
-<td align="center">83.0</td>
-<td align="center">142.0</td>
+<td align="center">-0.9</td>
+<td align="center">12.5</td>
 </tr>
 <tr class="even">
 <td align="center">52</td>
@@ -1055,13 +1062,13 @@ data = PredPerfUH(inputs)</code></pre>
 <td align="center">0.2</td>
 <td align="center">10</td>
 <td align="center">0.45</td>
-<td align="center">on</td>
+<td align="center">sim</td>
 <td align="center">0</td>
 <td align="center">17.38</td>
 <td align="center">86.7</td>
 <td align="center">-5.4</td>
-<td align="center">376.0</td>
-<td align="center">115.5</td>
+<td align="center">3.5</td>
+<td align="center">6.5</td>
 </tr>
 <tr class="odd">
 <td align="center">34</td>
@@ -1075,13 +1082,13 @@ data = PredPerfUH(inputs)</code></pre>
 <td align="center">0.2</td>
 <td align="center">10</td>
 <td align="center">0.45</td>
-<td align="center">on</td>
+<td align="center">sim</td>
 <td align="center">0</td>
 <td align="center">17.38</td>
 <td align="center">89.2</td>
 <td align="center">-6.8</td>
-<td align="center">181.5</td>
-<td align="center">316.4</td>
+<td align="center">1.2</td>
+<td align="center">13.2</td>
 </tr>
 <tr class="even">
 <td align="center">52</td>
@@ -1095,13 +1102,13 @@ data = PredPerfUH(inputs)</code></pre>
 <td align="center">0.2</td>
 <td align="center">10</td>
 <td align="center">0.45</td>
-<td align="center">on</td>
+<td align="center">sim</td>
 <td align="center">0</td>
 <td align="center">17.38</td>
 <td align="center">86.7</td>
 <td align="center">-6.8</td>
-<td align="center">413.7</td>
-<td align="center">35.8</td>
+<td align="center">4.0</td>
+<td align="center">6.2</td>
 </tr>
 <tr class="odd">
 <td align="center">34</td>
@@ -1115,13 +1122,13 @@ data = PredPerfUH(inputs)</code></pre>
 <td align="center">0.2</td>
 <td align="center">10</td>
 <td align="center">0.45</td>
-<td align="center">on</td>
+<td align="center">sim</td>
 <td align="center">0</td>
 <td align="center">17.38</td>
 <td align="center">85.2</td>
 <td align="center">-12.3</td>
-<td align="center">245.4</td>
-<td align="center">476.6</td>
+<td align="center">5.2</td>
+<td align="center">18.7</td>
 </tr>
 <tr class="even">
 <td align="center">52</td>
@@ -1135,13 +1142,13 @@ data = PredPerfUH(inputs)</code></pre>
 <td align="center">0.2</td>
 <td align="center">10</td>
 <td align="center">0.45</td>
-<td align="center">on</td>
+<td align="center">sim</td>
 <td align="center">0</td>
 <td align="center">17.38</td>
 <td align="center">83.0</td>
 <td align="center">-11.5</td>
-<td align="center">450.1</td>
-<td align="center">184.5</td>
+<td align="center">7.0</td>
+<td align="center">10.1</td>
 </tr>
 <tr class="odd">
 <td align="center">34</td>
@@ -1155,13 +1162,13 @@ data = PredPerfUH(inputs)</code></pre>
 <td align="center">0.2</td>
 <td align="center">10</td>
 <td align="center">0.45</td>
-<td align="center">on</td>
+<td align="center">sim</td>
 <td align="center">0</td>
 <td align="center">17.38</td>
 <td align="center">81.3</td>
 <td align="center">-9.9</td>
-<td align="center">225.1</td>
-<td align="center">23.5</td>
+<td align="center">-0.3</td>
+<td align="center">5.0</td>
 </tr>
 <tr class="even">
 <td align="center">52</td>
@@ -1175,13 +1182,13 @@ data = PredPerfUH(inputs)</code></pre>
 <td align="center">0.2</td>
 <td align="center">10</td>
 <td align="center">0.45</td>
-<td align="center">on</td>
+<td align="center">sim</td>
 <td align="center">0</td>
 <td align="center">17.38</td>
 <td align="center">78.6</td>
 <td align="center">-9.6</td>
-<td align="center">564.0</td>
-<td align="center">-69.4</td>
+<td align="center">0.2</td>
+<td align="center">1.8</td>
 </tr>
 <tr class="odd">
 <td align="center">34</td>
@@ -1195,13 +1202,13 @@ data = PredPerfUH(inputs)</code></pre>
 <td align="center">0.2</td>
 <td align="center">10</td>
 <td align="center">0.45</td>
-<td align="center">on</td>
+<td align="center">sim</td>
 <td align="center">0</td>
 <td align="center">17.38</td>
 <td align="center">81.0</td>
 <td align="center">-9.4</td>
-<td align="center">360.9</td>
-<td align="center">163.8</td>
+<td align="center">1.4</td>
+<td align="center">5.1</td>
 </tr>
 <tr class="even">
 <td align="center">52</td>
@@ -1215,13 +1222,13 @@ data = PredPerfUH(inputs)</code></pre>
 <td align="center">0.2</td>
 <td align="center">10</td>
 <td align="center">0.45</td>
-<td align="center">on</td>
+<td align="center">sim</td>
 <td align="center">0</td>
 <td align="center">17.38</td>
 <td align="center">79.2</td>
 <td align="center">-9.9</td>
-<td align="center">604.4</td>
-<td align="center">-155.6</td>
+<td align="center">-0.9</td>
+<td align="center">1.8</td>
 </tr>
 <tr class="odd">
 <td align="center">34</td>
@@ -1235,13 +1242,13 @@ data = PredPerfUH(inputs)</code></pre>
 <td align="center">0.2</td>
 <td align="center">10</td>
 <td align="center">0.45</td>
-<td align="center">on</td>
+<td align="center">sim</td>
 <td align="center">0</td>
 <td align="center">17.38</td>
 <td align="center">78.0</td>
 <td align="center">-12.4</td>
-<td align="center">361.6</td>
-<td align="center">316.6</td>
+<td align="center">6.6</td>
+<td align="center">10.2</td>
 </tr>
 <tr class="even">
 <td align="center">52</td>
@@ -1255,13 +1262,13 @@ data = PredPerfUH(inputs)</code></pre>
 <td align="center">0.2</td>
 <td align="center">10</td>
 <td align="center">0.45</td>
-<td align="center">on</td>
+<td align="center">sim</td>
 <td align="center">0</td>
 <td align="center">17.38</td>
 <td align="center">76.9</td>
 <td align="center">-12.3</td>
-<td align="center">585.3</td>
-<td align="center">-13.0</td>
+<td align="center">3.7</td>
+<td align="center">4.7</td>
 </tr>
 <tr class="odd">
 <td align="center">34</td>
@@ -1275,13 +1282,13 @@ data = PredPerfUH(inputs)</code></pre>
 <td align="center">0.2</td>
 <td align="center">10</td>
 <td align="center">0.45</td>
-<td align="center">on</td>
+<td align="center">sim</td>
 <td align="center">0</td>
 <td align="center">17.38</td>
 <td align="center">67.1</td>
 <td align="center">-15.0</td>
-<td align="center">1765.9</td>
-<td align="center">641.0</td>
+<td align="center">37.8</td>
+<td align="center">12.3</td>
 </tr>
 <tr class="even">
 <td align="center">52</td>
@@ -1295,13 +1302,13 @@ data = PredPerfUH(inputs)</code></pre>
 <td align="center">0.2</td>
 <td align="center">10</td>
 <td align="center">0.45</td>
-<td align="center">on</td>
+<td align="center">sim</td>
 <td align="center">0</td>
 <td align="center">17.38</td>
 <td align="center">61.5</td>
 <td align="center">-15.6</td>
-<td align="center">2296.9</td>
-<td align="center">501.7</td>
+<td align="center">30.2</td>
+<td align="center">11.6</td>
 </tr>
 <tr class="odd">
 <td align="center">34</td>
@@ -1315,13 +1322,13 @@ data = PredPerfUH(inputs)</code></pre>
 <td align="center">0.2</td>
 <td align="center">10</td>
 <td align="center">0.45</td>
-<td align="center">on</td>
+<td align="center">sim</td>
 <td align="center">0</td>
 <td align="center">17.38</td>
 <td align="center">65.9</td>
 <td align="center">-15.3</td>
-<td align="center">1732.2</td>
-<td align="center">684.8</td>
+<td align="center">38.0</td>
+<td align="center">13.8</td>
 </tr>
 <tr class="even">
 <td align="center">52</td>
@@ -1335,13 +1342,13 @@ data = PredPerfUH(inputs)</code></pre>
 <td align="center">0.2</td>
 <td align="center">10</td>
 <td align="center">0.45</td>
-<td align="center">on</td>
+<td align="center">sim</td>
 <td align="center">0</td>
 <td align="center">17.38</td>
 <td align="center">62.0</td>
 <td align="center">-15.9</td>
-<td align="center">2086.7</td>
-<td align="center">430.6</td>
+<td align="center">30.1</td>
+<td align="center">11.8</td>
 </tr>
 <tr class="odd">
 <td align="center">34</td>
@@ -1355,13 +1362,13 @@ data = PredPerfUH(inputs)</code></pre>
 <td align="center">0.2</td>
 <td align="center">10</td>
 <td align="center">0.45</td>
-<td align="center">on</td>
+<td align="center">sim</td>
 <td align="center">0</td>
 <td align="center">17.38</td>
 <td align="center">64.7</td>
 <td align="center">-18.0</td>
-<td align="center">1772.2</td>
-<td align="center">906.3</td>
+<td align="center">42.5</td>
+<td align="center">20.7</td>
 </tr>
 <tr class="even">
 <td align="center">52</td>
@@ -1375,13 +1382,13 @@ data = PredPerfUH(inputs)</code></pre>
 <td align="center">0.2</td>
 <td align="center">10</td>
 <td align="center">0.45</td>
-<td align="center">on</td>
+<td align="center">sim</td>
 <td align="center">0</td>
 <td align="center">17.38</td>
 <td align="center">61.4</td>
 <td align="center">-18.0</td>
-<td align="center">2129.3</td>
-<td align="center">665.7</td>
+<td align="center">34.3</td>
+<td align="center">17.6</td>
 </tr>
 <tr class="odd">
 <td align="center">34</td>
@@ -1395,13 +1402,13 @@ data = PredPerfUH(inputs)</code></pre>
 <td align="center">0.2</td>
 <td align="center">10</td>
 <td align="center">0.45</td>
-<td align="center">on</td>
+<td align="center">sim</td>
 <td align="center">0</td>
 <td align="center">17.38</td>
 <td align="center">91.6</td>
 <td align="center">-5.6</td>
-<td align="center">61.0</td>
-<td align="center">140.9</td>
+<td align="center">-1.7</td>
+<td align="center">16.8</td>
 </tr>
 <tr class="even">
 <td align="center">52</td>
@@ -1415,13 +1422,13 @@ data = PredPerfUH(inputs)</code></pre>
 <td align="center">0.2</td>
 <td align="center">10</td>
 <td align="center">0.45</td>
-<td align="center">on</td>
+<td align="center">sim</td>
 <td align="center">0</td>
 <td align="center">17.38</td>
 <td align="center">90.6</td>
 <td align="center">-4.0</td>
-<td align="center">354.0</td>
-<td align="center">117.1</td>
+<td align="center">2.7</td>
+<td align="center">10.7</td>
 </tr>
 </tbody>
 </table>
@@ -1449,7 +1456,7 @@ data = PredPerfUH(inputs)</code></pre>
 <p>A função <code>PredPerfUH()</code> simplesmente será chamada sem preencher o argumento <code>data_path</code>.</p>
 <p><br />
 </p>
-<pre class="r"><code>  data = PredPerfUH('inputs.csv')</code></pre>
+<pre class="r"><code>data = PredPerfUH('inputs.csv')</code></pre>
 <pre><code>Variáveis de entrada referentes à tipologia multifamiliar.</code></pre>
 <pre><code>A tabela com os resultados foi salva em: /home/rodox/git/stgbn/data.csv</code></pre>
 </div>
@@ -1464,8 +1471,8 @@ data = PredPerfUH(inputs)</code></pre>
 <p>A função <code>PredPerfUH()</code> será executada assumindo <code>data_path</code> a um nome alternativo.</p>
 <p><br />
 </p>
-<pre class="r"><code>  data_path = 'nome_do_arquivo.csv'
-  data = PredPerfUH('inputs.csv', data_path)</code></pre>
+<pre class="r"><code>data_path = 'nome_do_arquivo.csv'
+data = PredPerfUH('inputs.csv', data_path)</code></pre>
 <pre><code>Variáveis de entrada referentes à tipologia multifamiliar.</code></pre>
 <pre><code>A tabela com os resultados foi salva em: /home/rodox/git/stgbn/nome_do_arquivo.csv</code></pre>
 </div>
@@ -1480,8 +1487,8 @@ data = PredPerfUH(inputs)</code></pre>
 <p>A função <code>PredPerfUH()</code> será executada considerando um caminho alternativo no argumento <code>data_path</code>.</p>
 <p><br />
 </p>
-<pre class="r"><code>  data_path = '/home/rodox/Desktop/nome_do_arquivo.csv'
-  data = PredPerfUH('inputs.csv', data_path)</code></pre>
+<pre class="r"><code>data_path = '/home/rodox/Desktop/nome_do_arquivo.csv'
+data = PredPerfUH('inputs.csv', data_path)</code></pre>
 <pre><code>Variáveis de entrada referentes à tipologia multifamiliar.</code></pre>
 <pre><code>A tabela com os resultados foi salva em: /home/rodox/Desktop/nome_do_arquivo.csv</code></pre>
 </div>
@@ -1491,7 +1498,7 @@ data = PredPerfUH(inputs)</code></pre>
 <p>Para tanto, <code>PredPerfUH()</code> será executada considerando o argumento <code>data_path</code> como <code>data_path = NULL</code>.</p>
 <p><br />
 </p>
-<pre class="r"><code>  data = PredPerfUH('inputs.csv', NULL)</code></pre>
+<pre class="r"><code>data = PredPerfUH('inputs.csv', NULL)</code></pre>
 <pre><code>Variáveis de entrada referentes à tipologia multifamiliar.</code></pre>
 <pre><code>A tabela com os resultados não foi salva.</code></pre>
 </div>

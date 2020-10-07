@@ -10,7 +10,7 @@ subtitle: 'Em acordo com a nova proposta para a NBR 15575'
 
 ```{r include = FALSE}
 library(knitr)
-  opts_chunk$set(echo = TRUE, comment = '')
+opts_chunk$set(echo = TRUE, comment = '')
 ```
 
 ***
@@ -27,9 +27,9 @@ Todos os arquivos relacionados a esse projeto podem ser encontrados nesse [*link
 
 Para reproduzir o que foi descrito nesse documento é necessário que o usuário possua instalados em sua máquina local a linguagem [R](https://www.r-project.org/), versão 4.0.2, e os seguintes pacotes:
 
-1. [caret](https://cran.r-project.org/web/packages/caret/index.html), versão 6.0-86
-2. [dplyr](https://cran.r-project.org/web/packages/dplyr/index.html), versão 1.0.2
-3. [purrr](https://cran.r-project.org/web/packages/purrr/index.html), versão 0.3.4
+1. [`caret`](https://cran.r-project.org/web/packages/caret/index.html), versão 6.0-86
+2. [`dplyr`](https://cran.r-project.org/web/packages/dplyr/index.html), versão 1.0.2
+3. [`purrr`](https://cran.r-project.org/web/packages/purrr/index.html), versão 0.3.4
 
 \
 
@@ -38,10 +38,10 @@ Para instalar esses pacotes o usuário deve abrir o console na linguagem **R** e
 \
 
 ``` {r message = FALSE}
-  install.packages('devtools')
-  pkgs = c('caret', 'dplyr', 'purrr', 'xgboost')
-  vrs = c('6.0-86', '1.0.2', '0.3.4', '1.2.0.1')
-  mapply(devtools::install_version, pkgs, vrs)
+install.packages('devtools')
+pkgs = c('caret', 'dplyr', 'purrr', 'xgboost')
+vrs = c('6.0-86', '1.0.2', '0.3.4', '1.2.0.1')
+mapply(devtools::install_version, pkgs, vrs)
 ```
 
 \
@@ -65,14 +65,21 @@ A partir das perturbações e da implementação do método de amostragem *Latin
 
 Detalhes sobre a modelagem e o cálculo dos dados de saída podem ser encontrados na **nova proposta para NBR 15575**. O *download* da norma pode ser realizado através desse [*link*](https://drive.google.com/uc?export=download&id=1Y2CdTd3AIkkTphbIj-3EREn2eL07PbaJ).
 
-Através da base de dados foram treinados e testados metamodelos utilizando as seguintes técnicas: *Linear Regression*, *Support Vector Machine with Radial Kernel*, *Bayesian Neural Networks*, *Boosted Tree* e *Extreme Gradient Boosting*. No pre-processamento da base de dados, as variáveis de entrada quantitativas foram transformadas através da técnica *BoxCox* e as variáveis de entrada qualitativas foram transformadas em variáveis lógicas, também conhecidas como *Dummy Variables*. Todos os metamodelos foram treinados através do pacote [caret](https://topepo.github.io/caret/), da linguagem **R**.
+Através da base de dados foram treinados e testados metamodelos utilizando as seguintes técnicas: *Linear Regression*, *Support Vector Machine with Radial Kernel*, *Bayesian Neural Networks*, *Boosted Tree* e *Extreme Gradient Boosting*. No pre-processamento da base de dados, as variáveis de entrada quantitativas foram transformadas através da técnica *BoxCox* e as variáveis de entrada qualitativas foram transformadas em variáveis lógicas, também conhecidas como *Dummy Variables*. Todos os metamodelos foram treinados através do pacote [`caret`](https://topepo.github.io/caret/), da linguagem **R**.
 
 A tabela abaixo apresenta a estatística descritiva dos metamodelos finais, ou seja, aqueles que apresentaram os resultados mais acurados na etapa de teste, i.e. menores erro médio absoluto (MAE) e raíz do erro quadrático médio (RMSE). Os metamodelos mais acurados foram alcançados através da técnica [*Extreme Gradient Boosting*](https://xgboost.ai/).
 
 \
 
 ``` {r echo = FALSE, message = FALSE}
-  kable(read.csv('./plot_table/summ_stats.csv'), align = 'c')
+summ_stats = data.frame(check.names = FALSE,
+  'Tipologia' = rep(c('Uni', 'Multi'), each = 4),
+  'Dado de saída' = rep(c('PHFT', 'Dif. PHFT', 'CgTT', 'Dif. CgTT'), 2),
+  'MAE (kWh/m².ano)' = c(1.86, 1.92, 6.41, 5.96, 2.04, 1.98, 3.92, 4.41),
+  'RMSE (kWh/m².ano)' = c(2.98, 3.10, 10.48, 10.06, 2.74, 2.71, 5.53, 6.03),
+  'R² (adim.)' = c(0.97, 0.97, 0.97, 0.97, 0.99, 0.98, 0.99, 0.98)
+)
+kable(summ_stats, align = 'c')
 ```
 
 \
@@ -109,8 +116,8 @@ Para predizer cada um dos dados de saída foi elaborado um metamodelo diferente.
   + Uni/Multi: 10, 30 e 50
 * `fv` (adim.): fator de ventilação
   + Uni/Multi: 0.45 e 1
-* `ven` (qualitative): condição das venezianas
-  + Uni/Multi: "on" (com veneziana) e "off" (sem possui veneziana)
+* `ven` (qualitative): uso de venezianas
+  + Uni/Multi: "sim" (possui veneziana) e "nao" (não possui veneziana)
 * `somb` (cm): comprimento do sombreamento horizontal sobre todas as fachadas
   + Uni: 0, 50 e 150
   + Multi: 0 e 120
@@ -149,9 +156,8 @@ O código se inicia carregando os pacotes instalados previamente. Esses pacotes 
 \
 
 ```{r message = FALSE}
-  # load packages
-  pkgs = c('caret', 'dplyr', 'purrr', 'xgboost')
-  lapply(pkgs, library, character.only = TRUE)
+pkgs = c('caret', 'dplyr', 'purrr', 'xgboost')
+lapply(pkgs, library, character.only = TRUE)
 ```
 
 \
@@ -171,11 +177,8 @@ Primeiramente, a função `LoadModels()` checa se o diretório de trabalho inser
 \
 
 ``` {r message = FALSE}
-# setup environment
 LoadModels = function(work_dir) {
-  # work_dir: working directory
   # set working directory
-  work_dir = '/home/rodox/git/stgbn/'
   if (dir.exists(work_dir)) {
     setwd(work_dir)
   } else {
@@ -184,13 +187,13 @@ LoadModels = function(work_dir) {
   }
   # load predictive models
   if (file.exists('models.rds')) {
-    models = readRDS('models.rds')
+    models <- readRDS('models.rds')
   } else {
     stop(paste('O caminho para o arquivo com os metamodelos está',
                'incorreto. Confira se os arquivos predict_outputs.r',
                'e models.rds encontram-se no mesmo diretório.'))
   }
-  # return the predictive models
+  # return predictive models
   return(models)
 }
 ```
@@ -304,8 +307,8 @@ Após carregar os pacotes e definir as funções necessárias, como descrito ant
 \
 
 ```{r}
-  work_dir = '/home/rodox/git/stgbn/'
-  models = LoadModels(work_dir)
+work_dir = '/home/rodox/git/stgbn/'
+models = LoadModels(work_dir)
 ```
 
 \
@@ -335,7 +338,7 @@ inputs = list(
   abs = 0.4,
   paf = 30,
   fv = 0.45,
-  ven = 'off',
+  ven = 'nao',
   somb = 50,
   tbsm = 23.05
 )
@@ -349,11 +352,11 @@ Os resultados serão impressos no console para verificar se tudo saiu como o pla
 \
 
 ``` {r eval = FALSE}
-  print(data)
+print(data)
 ```
 
 ``` {r echo = FALSE}
-  kable(data, align = 'c')
+kable(data, align = 'c')
 ```
 
 \
@@ -377,7 +380,7 @@ inputs = list(
   abs = 0.2,
   paf = c(10, 30, 50),
   fv = 0.45,
-  ven = 'off',
+  ven = 'nao',
   somb = 50,
   tbsm = 23.05
 )
@@ -391,11 +394,11 @@ Os resultados serão impressos na tela.
 \
 
 ``` {r eval = FALSE}
-  print(data)
+print(data)
 ```
 
 ``` {r echo = FALSE}
-  kable(data, align = 'c')
+kable(data, align = 'c')
 ```
 
 \
@@ -409,9 +412,9 @@ Será definido o caminho (na máquina local) para o arquivo *csv* com os *inputs
 \
 
 ``` {r}
-  inputs = 'inputs.csv'
-  data = PredPerfUH(inputs)
-  nrow(data)
+inputs = 'inputs.csv'
+data = PredPerfUH(inputs)
+nrow(data)
 ```
 
 \
@@ -421,11 +424,11 @@ Repare que a tabela de *inputs* inserida nesse exemplo possui 27668 observaçõe
 \
 
 ``` {r eval = FALSE}
-  print(head(data, 20))
+print(head(data, 20))
 ```
 
 ``` {r echo = FALSE}
-  kable(head(data, 20), align = 'c')
+kable(head(data, 20), align = 'c')
 ```
 
 ####
@@ -455,7 +458,7 @@ A função `PredPerfUH()` simplesmente será chamada sem preencher o argumento `
 \
 
 ``` {r}
-  data = PredPerfUH('inputs.csv')
+data = PredPerfUH('inputs.csv')
 ```
 
 ##### *Nome alternativo*
@@ -473,8 +476,8 @@ A função `PredPerfUH()` será executada assumindo `data_path` a um nome altern
 \
 
 ``` {r}
-  data_path = 'nome_do_arquivo.csv'
-  data = PredPerfUH('inputs.csv', data_path)
+data_path = 'nome_do_arquivo.csv'
+data = PredPerfUH('inputs.csv', data_path)
 ```
 
 ##### *Caminho alternativo*
@@ -492,8 +495,8 @@ A função `PredPerfUH()` será executada considerando um caminho alternativo no
 \
 
 ``` {r}
-  data_path = '/home/rodox/Desktop/nome_do_arquivo.csv'
-  data = PredPerfUH('inputs.csv', data_path)
+data_path = '/home/rodox/Desktop/nome_do_arquivo.csv'
+data = PredPerfUH('inputs.csv', data_path)
 ```
 
 ##### *Não salvar*
@@ -505,5 +508,5 @@ Para tanto, `PredPerfUH()` será executada considerando o argumento `data_path` 
 \
 
 ``` {r}
-  data = PredPerfUH('inputs.csv', NULL)
+data = PredPerfUH('inputs.csv', NULL)
 ```
