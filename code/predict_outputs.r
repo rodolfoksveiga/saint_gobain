@@ -93,8 +93,8 @@ PredPerfUH = function(inputs, data_path = 'data.csv') {
       message(paste('A tabela com os resultados foi salva em:',
                     normalizePath(data_path)))
     } else {
-      stop(paste('O diretório para pra salvar a tabela com os resultados',
-                 'me parece incorreto.\n  Confira se o caminho inserido',
+      stop(paste('O diretório para salvar a tabela com os resultados me',
+                 'parece incorreto.\n  Confira se o caminho inserido',
                  'no argumento "data_path" realmente existe.'))
     }
   } else {
